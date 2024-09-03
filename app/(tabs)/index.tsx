@@ -1,4 +1,11 @@
-import { Button, Image, Text, TouchableOpacity, View } from "react-native";
+import {
+  Button,
+  Image,
+  Text,
+  TouchableOpacity,
+  View,
+  ScrollView,
+} from "react-native";
 import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
 import { useRef, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
@@ -7,7 +14,7 @@ import tw from "twrnc";
 export default function HomeScreen() {
   const [facing, setFacing] = useState<CameraType>("back");
   const [permission, requestPermission] = useCameraPermissions();
-  const [images, setImages] = useState<any[]>([]); //multiple array store
+  const [images, setImages] = useState<any[]>([]);
   const camera: any = useRef(null);
 
   if (!permission) {
@@ -31,33 +38,35 @@ export default function HomeScreen() {
 
   async function takePicture() {
     const picture: any = await camera.current.takePictureAsync();
-    setImages((prevImages) => prevImages.concat(picture)); //add new picture
+    setImages((prevImages) => prevImages.concat(picture));
   }
 
   function deleteImage(index: number) {
-    setImages((prevImages) => prevImages.filter((_, i) => i !== index)); //delete picture
+    setImages((prevImages) => prevImages.filter((_, i) => i !== index));
   }
 
   return (
     <View style={tw`flex-1`}>
-      <View style={tw`bg-white  ${images.length > 0 ? "p-4" : ""}`}>
-        {images.map((item, index) => (
-          <View
-            key={index}
-            style={tw`flex-row items-center mb-2 justify-between mr-3`}
-          >
-            <Image source={{ uri: item.uri }} style={tw`w-20 h-20`} />
-            <TouchableOpacity
-              style={tw`ml-2`}
-              onPress={() => deleteImage(index)}
-            >
-              <Ionicons name="trash-outline" size={24} color="red" />
-            </TouchableOpacity>
-          </View>
-        ))}
+      <View style={tw`${images.length > 0 ? "bg-white" : ""}`}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={tw`p-4`}
+        >
+          {images.map((item, index) => (
+            <View key={index} style={tw`items-center mr-1`}>
+              <Image source={{ uri: item.uri }} style={tw`w-20 h-20`} />
+              <TouchableOpacity
+                style={tw`mt-2`}
+                onPress={() => deleteImage(index)}
+              >
+                <Ionicons name="trash-outline" size={24} color="red" />
+              </TouchableOpacity>
+            </View>
+          ))}
+        </ScrollView>
       </View>
 
-      {/* Camera view at the bottom */}
       <CameraView ref={camera} style={tw`flex-1`} facing={facing}>
         <View
           style={tw`absolute bottom-16 left-0 right-0 flex-row justify-around`}
