@@ -16,10 +16,13 @@ export default function TabTwoScreen() {
         return;
       }
 
-      const options = { accuracy: Location.Accuracy.High, distanceInterval: 0.3 };
-      await Location.watchPositionAsync(options, (location: any) => {
-        setLocation(location);
-      });
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation(location);
+
+      // const options = { accuracy: Location.Accuracy.High, distanceInterval: 1.2 };
+      // await Location.watchPositionAsync(options, (location: any) => {
+      //   setLocation(location);
+      // });
     })();
   }, []);
 
