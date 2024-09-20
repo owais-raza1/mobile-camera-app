@@ -4,12 +4,14 @@ import { useState, useEffect } from "react";
 import * as Location from "expo-location";
 import tw from "twrnc";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 
-export default function TabTwoScreen() {
+export default function Dropoff() {
+  const params = useLocalSearchParams();
+  console.log("params", params);
   const [location, setLocation] = useState<any>(null);
   const [errorMsg, setErrorMsg] = useState<any>(null);
-  const [pickupLocation, setPickupLocation] = useState<any>(null);
+  const [dropoffLocation, setdropoffLocation] = useState<any>(null);
   const [searchResult, setSearchResult] = useState<any>([]);
   const [searchText, setSearchText] = useState<string>("");
 
@@ -26,8 +28,8 @@ export default function TabTwoScreen() {
     })();
   }, []);
 
-  const findPickupLocation = (text: any) => {
-    setSearchText(text); // Store search input value
+  const finddropoffLocation = (text: any) => {
+    setSearchText(text);
     if (!location) return;
 
     const { latitude, longitude } = location.coords;
@@ -50,8 +52,8 @@ export default function TabTwoScreen() {
   };
 
   // Cancel function to clear input and re-enable
-  const clearPickupLocation = () => {
-    setPickupLocation(null);
+  const cleardropoffLocation = () => {
+    setdropoffLocation(null);
     setSearchText("");
     setSearchResult([]);
   };
@@ -61,15 +63,15 @@ export default function TabTwoScreen() {
       {/* Search Bar */}
       <View style={tw`mt-5 p-2 flex-row items-center border bg-white shadow rounded-lg mx-4`}>
         <TextInput
-          placeholder="Search Pickup places"
+          placeholder="Search Dropoff places"
           style={tw`flex-1 p-3 text-lg text-gray-700`}
-          onChangeText={findPickupLocation}
-          value={pickupLocation ? pickupLocation.name : searchText}
-          editable={!pickupLocation}
+          onChangeText={finddropoffLocation}
+          value={dropoffLocation ? dropoffLocation.name : searchText}
+          editable={!dropoffLocation}
         />
 
-        {pickupLocation && (
-          <TouchableOpacity onPress={clearPickupLocation}>
+        {dropoffLocation && (
+          <TouchableOpacity onPress={cleardropoffLocation}>
             <Ionicons
               name="close-circle"
               size={24}
@@ -81,12 +83,12 @@ export default function TabTwoScreen() {
       </View>
 
       {/* Search Results */}
-      {searchResult && !pickupLocation && (
+      {searchResult && !dropoffLocation && (
         <View style={tw`w-full mt-2 px-4`}>
           {searchResult.map((item: any) => (
             <TouchableOpacity
-              key={item.fsq_id}
-              onPress={() => setPickupLocation(item)}
+              key={item.id}
+              onPress={() => setdropoffLocation(item)}
               style={tw`p-3 bg-white rounded-lg shadow mb-2`}
             >
               <Text style={tw`font-semibold text-gray-800`}>{item.name}</Text>
@@ -98,7 +100,19 @@ export default function TabTwoScreen() {
         </View>
       )}
 
-      {/* Map */}
+      {/* Pickup Location */}
+      {params && (
+        <View style={tw`mt-3 px-4`}>
+          <Text style={tw`font-semibold text-lg text-gray-800`}>
+            Pickup Location: {params.name}
+          </Text>
+          <Text style={tw`text-gray-600`}>
+            {params.address}
+          </Text>
+        </View>
+      )}
+
+      {/* Map View */}
       {location ? (
         <View style={tw`flex-1 mt-4 px-4`}>
           <MapView
@@ -108,7 +122,7 @@ export default function TabTwoScreen() {
               latitudeDelta: 0.005,
               longitudeDelta: 0.005,
             }}
-            style={tw`w-full h-[70%] rounded-lg shadow-lg`}
+            style={tw`w-full h-[60%] rounded-lg shadow-lg`}
           >
             <Marker
               coordinate={{
@@ -127,26 +141,30 @@ export default function TabTwoScreen() {
         </View>
       )}
 
-      {/* Dropoff Button */}
+      {/* Select Car Button */}
       <View style={tw`px-4 mb-6`}>
-        <TouchableOpacity
-          style={tw`mt-5 bg-blue-600 p-4 rounded-lg shadow-lg`}
-          onPress={() =>
-            router.push({
-              pathname: "/dropoff",
-              params: {
-                name: pickupLocation.name,
-                address: pickupLocation.location.formatted_address,
-                latitude: pickupLocation.geocodes.main.latitude,
-                longitude: pickupLocation.geocodes.main.longitude,
-              },
-            })
-          }
-        >
-          <Text style={tw`text-white text-center text-lg font-bold`}>
-            Select Dropoff
-          </Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={tw`mt-5 bg-blue-600 p-4 rounded-lg shadow-lg`}
+            onPress={() =>
+              router.push({
+                pathname: "/vehicleSelection",
+                params: {
+                  pickupName: params.name,
+                  pickupAddress: params.address,
+                  pickupLatitude: params.latitude,
+                  pickupLongitude: params.longitude,
+                  dropoffName: dropoffLocation.name,
+                  dropoffAddress: dropoffLocation.location.formatted_address,
+                  dropoffLatitude: dropoffLocation.geocodes.main.latitude,
+                  dropoffLongitude: dropoffLocation.geocodes.main.longitude,
+                },
+              })
+            }
+          >
+            <Text style={tw`text-white text-center text-lg font-bold`}>
+              Select Car
+            </Text>
+          </TouchableOpacity>
       </View>
     </View>
   );
